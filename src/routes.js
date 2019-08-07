@@ -8,7 +8,7 @@ function Routes() {
   return (
     <BrowserRouter>
       <Route path="/" exact component={ Login }/>
-      <Route path="/" component={ Main }/>
+      <Route path="/main" component={ Main }/>
     </BrowserRouter>
   )
 }
