@@ -13,12 +13,12 @@ function Login({ history }) {
     e.preventDefault();
 
     const response = await api.post('/devs', {
-      username,
+      username
     });
 
-    console.log(response);
+    const { _id } = response.data;
 
-    history.push('/main');
+    history.push(`/dev/${ _id }`);
   }
 
   return (
