@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import io from 'socket.io-client';
 
 import './Main.css';
 
@@ -8,13 +9,16 @@ import api from '../services/api';
 import logo from '../assets/logo.svg'; 
 import dislike from '../assets/dislike.svg'; 
 import like from '../assets/like.svg'; 
+import itsamatch from '../assets/itsamatch.png'; 
 
 
 function Main({ match }) {
 
   const [users, setUsers] = useState([]);
+  const [matchDev, setMatchDev] = useState(null);
 
-  useEffect( () => {
+  // CALLING THE API
+  useEffect(() => {
     async function loadUsers() {
       const response = await api.get('/devs', {
         headers: { 
@@ -27,6 +31,18 @@ function Main({ match }) {
     loadUsers();
   }, [ match.params.id ]);
 
+  // CALLING WEBSOCKET
+  useEffect(() => {
+    const socket = io('http://localhost:3333', {
+      query: { user: match.params.id }
+    }); 
+    
+    socket.on('match', dev => {
+      setMatchDev(dev);
+    })
+  }, [match.params.id]);
+
+  // FUNCTION TO HANDLE THE LIKE FEATURE
   async function handleLike(id) {
     await api.post(`/devs/${id}/likes`, null, {
       headers: {
@@ -36,7 +52,7 @@ function Main({ match }) {
 
     setUsers(users.filter(user => user._id !== id));
   }
-
+  // FUNCTION TO HANDLE THE DISLIKE FEATURE
   async function handleDislike(id) {
     await api.post(`/devs/${id}/dislikes`, null, {
       headers: {
@@ -76,6 +92,17 @@ function Main({ match }) {
       ) : (
         <div className="empty">Acabou :(</div>
       ) }
+      { matchDev && (
+        <div className="match-container">
+          <img src={itsamatch} alt="It's a Match!"/>
+
+          <img className="avatar" src={matchDev.avatar} alt=""/>
+          <strong>{matchDev.name}</strong>
+          <p>{matchDev.bio}</p>
+
+          <button type="button" onClick={() => { setMatchDev(null)}}>FECHAR</button>
+        </div>
+      )}
     </div>
   );
 }
